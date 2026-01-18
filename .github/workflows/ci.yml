@@ -1,4 +1,4 @@
-name: AVR Build CI
+name: Zig Build CI
 
 on:
   push:
@@ -13,26 +13,19 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install AVR Toolchain
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gcc-avr avr-libc
+    - name: Setup Zig
+      uses: mlugg/setup-zig@v1
+      with:
+        version: 0.11.0
 
-    - name: Build Project
+    - name: Build Firmware
       run: |
-        # Compile drivers
-        avr-gcc -mmcu=atmega32 -DF_CPU=16000000UL -Os -c drivers/lcd.c -o drivers/lcd.o
-        avr-gcc -mmcu=atmega32 -DF_CPU=16000000UL -Os -c drivers/accel.c -o drivers/accel.o
-        
-        # Compile main and link
-        avr-gcc -mmcu=atmega32 -DF_CPU=16000000UL -Os src/main.c drivers/lcd.o drivers/accel.o -o main.elf
-        
-        # Verify hex generation
-        avr-objcopy -j .text -j .data -O ihex main.elf main.hex
+        zig build-exe src/main.zig -target avr-freestanding -mcpu atmega328p
 
     - name: Archive artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: main-hex
-        path: main.hex
+        name: firmware-elf
+        path: main.elf
+
 
