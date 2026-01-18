@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install AVR Toolchain
       run: |
@@ -31,7 +31,8 @@ jobs:
         avr-objcopy -j .text -j .data -O ihex main.elf main.hex
 
     - name: Archive artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: main-hex
         path: main.hex
+
