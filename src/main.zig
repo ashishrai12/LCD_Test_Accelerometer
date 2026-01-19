@@ -40,10 +40,33 @@ fn readAccel() regs.AccelData {
 }
 
 fn printInt(val: i16) void {
-    var buf: [8]u8 = undefined;
-    const s = std.fmt.bufPrint(&buf, "{}", .{val}) catch "0";
-    uart.print(s);
+    if (val == 0) {
+        uart.transmit('0');
+        return;
+    }
+    var v = val;
+    if (v < 0) {
+        uart.transmit('-');
+        // Handle -32768 case safely
+        if (v == -32768) {
+            uart.print("32768");
+            return;
+        }
+        v = -v;
+    }
+    var buf: [6]u8 = undefined;
+    var i: usize = 0;
+    while (v > 0) {
+        buf[i] = @intCast(v % 10);
+        v /= 10;
+        i += 1;
+    }
+    while (i > 0) {
+        i -= 1;
+        uart.transmit(@intCast(buf[i] + '0'));
+    }
 }
+
 
 fn mockI2CWrite(reg: u8, val: u8) void {
     _ = reg;
